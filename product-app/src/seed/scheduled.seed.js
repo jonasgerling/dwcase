@@ -1,26 +1,20 @@
 const axios = require('axios');
 const dbclient = require("../dynamodb.client");
-const {
-    PutItemCommand
-} = require("@aws-sdk/client-dynamodb");
-
-
+const { PutItemCommand } = require("@aws-sdk/client-dynamodb");
 const { marshall } = require("@aws-sdk/util-dynamodb");
+
 const imageUrl = 'https://assignment.dwbt.tech/images';
 const productUrl = 'https://assignment.dwbt.tech/products';
 
 const dataSeed = async () => {
-
   const response = { statusCode: 200 };
 
   try {
     const images = await axiosGet(imageUrl);
     const products = await axiosGet(productUrl);
     const productInformation = createFullProductInformation(products, images);
-    console.log(`TABLENAME: ${process.env.DYNAMODB_TABLE_NAME}`)
-      // TODO: SCAN DATABASE
-      //check if entry exist on sku
-      productInformation.map(async (product, i) => {
+
+    productInformation.map(async (product, i) => {
         await addProduct({...product, id:i+""})
     })
 
@@ -64,7 +58,6 @@ function createFullProductInformation(products, images) {
       });
   }
 }
-
 
 async function axiosGet(url) {
     try {

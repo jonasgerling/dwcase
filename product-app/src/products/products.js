@@ -1,8 +1,7 @@
 const dbclient = require("../dynamodb.client");
 const {
     GetItemCommand,
-    ScanCommand,
-    PutItemCommand
+    ScanCommand
 } = require("@aws-sdk/client-dynamodb");
 const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 
@@ -53,35 +52,6 @@ const getProducts = async () => {
 
   return response;
 };
-
-// TODO: remove
-const createProduct = async (event) => {
-  const response = { statusCode: 200 };
-  try {
-      const body = JSON.parse(event.body);
-      const params = {
-          TableName: process.env.DYNAMODB_TABLE_NAME,
-          Item: marshall(body || {}),
-      };
-      const createResult = await dbclient.send(new PutItemCommand(params));
-
-      response.body = JSON.stringify({
-          message: "Successfully created products.",
-          createResult,
-      });
-  } catch (e) {
-      console.error(e);
-      response.statusCode = 500;
-      response.body = JSON.stringify({
-          message: "Failed to create product.",
-          errorMsg: e.message,
-          errorStack: e.stack,
-      });
-  }
-
-  return response;
-};
-
 
 module.exports = {
   createProduct,
