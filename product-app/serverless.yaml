@@ -1,0 +1,102 @@
+service: dynamodb-dw-api
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  region: eu-north-1
+  environment:
+    DYNAMODB_TABLE_NAME: ${self:custom.productsTableName}
+
+custom:
+  productsTableName: products-table-${self:provider.stage}
+  dynamodb:
+    stages:
+      - dev
+    start:
+      migrate: true
+  serverless-offline:
+    resourceRoutes: true
+
+plugins:
+  - serverless-iam-roles-per-function
+  - serverless-dynamodb-local
+  - serverless-offline
+
+functions:
+  getProduct:
+    handler: src/products/products.getProduct
+    name: getProduct
+    memorySize: 128 # mb
+    timeout: 5 # seconds
+    events:
+      - http:
+          path: products/{id}
+          method: GET
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - "dynamodb:GetItem"
+        Resource: !GetAtt ProductsTable.Arn
+
+  getProducts:
+    handler: src/products/products.getProducts
+    name: getProducts
+    memorySize: 128 # mb
+    timeout: 5 # seconds
+    events:
+      - http:
+          path: products
+          method: GET
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - "dynamodb:Scan"
+        Resource: !GetAtt ProductsTable.Arn
+
+  createPost:
+    handler: src/products/products.createProduct
+    name: createProduct
+    memorySize: 128 # mb
+    timeout: 5 # seconds
+    events:
+      - http:
+          path: post
+          method: POST
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - "dynamodb:PutItem"
+        Resource: !GetAtt ProductsTable.Arn
+
+  dataSeed:
+    handler: src/seed/scheduled.seed.dataSeed
+    name: dataSeed
+    memorySize: 128 # mb
+    timeout: 5 # seconds
+    events:
+      - schedule: rate(3 minutes)
+      - http:
+          path: dataSeed
+          method: POST
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - "dynamodb:PutItem"
+        Resource: !GetAtt ProductsTable.Arn
+
+resources:
+  Resources:
+    ProductsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.productsTableName}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
