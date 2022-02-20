@@ -1,4 +1,5 @@
 node_modules
 .dynamodb
 .idea
+.vscode
 yarn-error.log

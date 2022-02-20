@@ -1,8 +1,8 @@
 const axios = require('axios');
-const dbclient = require("../dynamodb.client");
 const { PutItemCommand } = require("@aws-sdk/client-dynamodb");
 const { marshall } = require("@aws-sdk/util-dynamodb");
 
+const dbclient = require("../dynamodb.client");
 const imageUrl = 'https://assignment.dwbt.tech/images';
 const productUrl = 'https://assignment.dwbt.tech/products';
 

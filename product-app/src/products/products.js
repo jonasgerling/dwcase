@@ -1,10 +1,10 @@
-const dbclient = require("../dynamodb.client");
 const {
     GetItemCommand,
     ScanCommand
 } = require("@aws-sdk/client-dynamodb");
 const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 
+const dbclient = require("../dynamodb.client");
 const getProduct = async (event) => {
   const response = { statusCode: 200 };
   try {
@@ -13,12 +13,19 @@ const getProduct = async (event) => {
           Key: marshall({ id: event.pathParameters.id }),
       };
       const { Item } = await dbclient.send(new GetItemCommand(params));
+      if(Item) {
+          const product = unmarshall(Item);
+          response.body = JSON.stringify({
+            message: "Successfully retrieved product.",
+            data: product,
+        });
+      } else {
+          response.statusCode = 404;
+          response.body = JSON.stringify({
+              message: `Product not found with id: ${event.pathParameters.id}.`,
+          });
+      }
 
-      console.log({ Item });
-      response.body = JSON.stringify({
-          message: "Successfully retrieved product.",
-          data: (Item) ? unmarshall(Item) : {},
-      });
   } catch (e) {
       console.error(e);
       response.statusCode = 500;
@@ -54,7 +61,6 @@ const getProducts = async () => {
 };
 
 module.exports = {
-  createProduct,
   getProduct,
   getProducts
 }
