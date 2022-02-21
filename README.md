@@ -1,3 +1,6 @@
+### Prerequisite
+JAVA must be installed on the machine.
+
 ###Clone repo and install dependencies
 ```
 git clone git@github.com:jonasgerling/dwcase.git
@@ -29,7 +32,7 @@ Server should be up and running on http://localhost:8000
 ###Local lambdas
 Local lambdas are running on at http://localhost:3000
 ####Scheduled data seed
-The data seed runs every 3 minutes by default.
+The data seed runs every 2 minutes by default and populates DynamoDB.
 Can be changed in serverless.yaml
 
 ####Endpoints
